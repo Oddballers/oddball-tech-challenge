@@ -1,12 +1,11 @@
+'use client'
 
-"use client";
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import type { z } from 'zod'
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import type { z } from "zod";
-
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -14,10 +13,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Form,
   FormControl,
@@ -25,76 +23,48 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { useToast } from "@/hooks/use-toast";
-import {
-  createCustomChallengeAction,
-  createPromptedChallengeAction,
-} from "@/lib/actions";
-import { CustomChallengeFormSchema, PromptChallengeFormSchema } from "@/lib/schemas";
-import { Loader2, PlusCircle } from "lucide-react";
-import type { ChallengeResult, CustomChallengeResult, PromptedChallengeResult } from "@/types";
-import { ChallengeResultDialog } from "./challenge-result-dialog";
+} from '@/components/ui/form'
+import { useToast } from '@/hooks/use-toast'
+import { createPromptedChallengeAction } from '@/lib/actions'
+import { PromptChallengeFormSchema } from '@/lib/schemas'
+import { Loader2, PlusCircle } from 'lucide-react'
+import type { ChallengeResult } from '@/types'
+import { ChallengeResultDialog } from './challenge-result-dialog'
 
 export function CreateChallengeDialog() {
-  const [open, setOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<ChallengeResult | null>(null);
-  const [isResultOpen, setIsResultOpen] = useState(false);
-  const { toast } = useToast();
+  const [open, setOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [result, setResult] = useState<ChallengeResult | null>(null)
+  const [isResultOpen, setIsResultOpen] = useState(false)
+  const { toast } = useToast()
 
-  const customForm = useForm<z.infer<typeof CustomChallengeFormSchema>>({
-    resolver: zodResolver(CustomChallengeFormSchema),
-    defaultValues: {
-      candidateName: "",
-      candidateEmail: "",
-      jobTitle: "",
-      resume: "",
-    },
-  });
-
-  const promptForm = useForm<z.infer<typeof PromptChallengeFormSchema>>({
+  const form = useForm<z.infer<typeof PromptChallengeFormSchema>>({
     resolver: zodResolver(PromptChallengeFormSchema),
     defaultValues: {
-      prompt: "",
+      candidateName: '',
+      candidateEmail: '',
+      jobTitle: '',
+      resume: '',
+      jobDescription: '',
     },
-  });
+  })
 
-  async function onCustomSubmit(values: z.infer<typeof CustomChallengeFormSchema>) {
-    setIsLoading(true);
+  async function onSubmit(values: z.infer<typeof PromptChallengeFormSchema>) {
+    setIsLoading(true)
     try {
-      const challengeResult = await createCustomChallengeAction(values);
-      setResult(challengeResult);
-      setIsResultOpen(true);
-      setOpen(false);
-      customForm.reset();
+      const challengeResult = await createPromptedChallengeAction(values)
+      setResult(challengeResult)
+      setIsResultOpen(true)
+      setOpen(false)
+      form.reset()
     } catch (error) {
       toast({
-        variant: "destructive",
-        title: "Error creating challenge",
-        description: "An unexpected error occurred. Please try again.",
-      });
+        variant: 'destructive',
+        title: 'Error creating challenge',
+        description: 'An unexpected error occurred. Please try again.',
+      })
     } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function onPromptSubmit(values: z.infer<typeof PromptChallengeFormSchema>) {
-    setIsLoading(true);
-    try {
-      const challengeResult = await createPromptedChallengeAction(values);
-      setResult(challengeResult);
-      setIsResultOpen(true);
-      setOpen(false);
-      promptForm.reset();
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error creating challenge",
-        description: "An unexpected error occurred. Please try again.",
-      });
-    } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
   }
 
@@ -114,112 +84,94 @@ export function CreateChallengeDialog() {
               Generate a coding challenge using one of the methods below.
             </DialogDescription>
           </DialogHeader>
-          <Tabs defaultValue="custom">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="custom">Custom from Resume</TabsTrigger>
-              <TabsTrigger value="prompt">From Prompt</TabsTrigger>
-            </TabsList>
-            <TabsContent value="custom">
-              <Form {...customForm}>
-                <form onSubmit={customForm.handleSubmit(onCustomSubmit)} className="space-y-4 py-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={customForm.control}
-                      name="candidateName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Candidate Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="John Doe" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={customForm.control}
-                      name="candidateEmail"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Candidate Email</FormLabel>
-                          <FormControl>
-                            <Input placeholder="john.doe@example.com" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <FormField
-                    control={customForm.control}
-                    name="jobTitle"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Job Title</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Senior Software Engineer" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={customForm.control}
-                    name="resume"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Candidate's Resume</FormLabel>
-                        <FormControl>
-                          <Textarea placeholder="Paste resume text here..." className="min-h-[150px]" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Generate Custom Challenge
-                  </Button>
-                </form>
-              </Form>
-            </TabsContent>
-            <TabsContent value="prompt">
-              <Form {...promptForm}>
-                <form onSubmit={promptForm.handleSubmit(onPromptSubmit)} className="space-y-4 py-4">
-                  <FormField
-                    control={promptForm.control}
-                    name="prompt"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Challenge Prompt</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="e.g., 'Create a simple API endpoint that fetches data from a public API and caches the result.'"
-                            className="min-h-[200px]"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Generate from Prompt
-                  </Button>
-                </form>
-              </Form>
-            </TabsContent>
-          </Tabs>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="candidateName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Candidate Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="John Doe" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="candidateEmail"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Candidate Email</FormLabel>
+                      <FormControl>
+                        <Input placeholder="john.doe@example.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <FormField
+                control={form.control}
+                name="jobTitle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Job Title</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Senior Software Engineer" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="resume"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Candidate's Resume</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Paste resume text here..."
+                        className="min-h-[150px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="jobDescription"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Job Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Paste the JD here..."
+                        className="min-h-[150px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Generate Challenge
+              </Button>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
       {result && (
-        <ChallengeResultDialog
-          isOpen={isResultOpen}
-          setIsOpen={setIsResultOpen}
-          result={result}
-        />
+        <ChallengeResultDialog isOpen={isResultOpen} setIsOpen={setIsResultOpen} result={result} />
       )}
     </>
-  );
+  )
 }
