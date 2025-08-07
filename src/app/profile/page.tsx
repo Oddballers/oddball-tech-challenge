@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase';
+import { auth, db, isFirebaseConfigured } from '@/lib/firebase';
 import type { UserProfile } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,9 @@ import { Badge } from '@/components/ui/badge';
 import Header from '@/components/header';
 import { Mail, User, Calendar } from 'lucide-react';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export default function ProfilePage() {
   const [user, loading] = useAuthState(auth);
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -22,6 +25,11 @@ export default function ProfilePage() {
   const router = useRouter();
 
   useEffect(() => {
+    if (!isFirebaseConfigured) {
+      router.push('/demo');
+      return;
+    }
+    
     if (loading) return;
     if (!user) {
       router.push('/login');
@@ -30,22 +38,30 @@ export default function ProfilePage() {
 
     const fetchProfile = async () => {
       setIsLoading(true);
-      const docRef = doc(db, 'users', user.uid);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setProfile({
-            ...data,
-            createdAt: data.createdAt.toDate(),
-        } as UserProfile);
-      } else {
-        console.log('No such document!');
+      try {
+        const docRef = doc(db!, 'users', user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setProfile({
+              ...data,
+              createdAt: data.createdAt.toDate(),
+          } as UserProfile);
+        } else {
+          console.log('No such document!');
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
       }
       setIsLoading(false);
     };
 
     fetchProfile();
   }, [user, loading, router]);
+
+  if (!isFirebaseConfigured) {
+    return <div>Redirecting...</div>;
+  }
 
   if (loading || isLoading) {
     return (

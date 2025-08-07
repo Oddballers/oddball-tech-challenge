@@ -26,7 +26,7 @@ const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
 // Add CORS middleware
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000'], // Add your frontend URLs
+  origin: ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:9002', 'http://localhost:3001'], // Add your frontend URLs
   credentials: true
 }));
 
