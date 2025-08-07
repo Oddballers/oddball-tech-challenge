@@ -27,8 +27,11 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
-import { auth } from "@/lib/firebase";
+import { auth, isFirebaseConfigured } from "@/lib/firebase";
 import { setSession } from '@/lib/actions';
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
 
 
 const LoginFormSchema = z.object({
@@ -52,7 +55,17 @@ export default function LoginPage() {
   async function onSubmit(values: z.infer<typeof LoginFormSchema>) {
     setIsLoading(true);
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
+      if (!isFirebaseConfigured) {
+        toast({
+          variant: "destructive",
+          title: "Authentication Disabled",
+          description: "Firebase is not configured. Use the demo page instead.",
+        });
+        router.push("/demo");
+        return;
+      }
+      
+      const userCredential = await signInWithEmailAndPassword(auth!, values.email, values.password);
       const idToken = await userCredential.user.getIdToken();
       
       await setSession(idToken);
@@ -122,6 +135,11 @@ export default function LoginPage() {
             Don&apos;t have an account?{" "}
             <Link href="/signup" className="underline">
               Sign up
+            </Link>
+          </div>
+          <div className="mt-2 text-center text-sm">
+            <Link href="/demo" className="underline text-primary">
+              Try the demo instead
             </Link>
           </div>
         </CardContent>

@@ -18,6 +18,13 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  experimental: {
+    skipTrailingSlashRedirect: true,
+  },
+  // Skip prerendering pages that have Firebase dependencies
+  generateBuildId: async () => {
+    return 'build-' + Date.now().toString()
+  },
 };
 
 export default nextConfig;

@@ -4,10 +4,10 @@ import type { NextRequest } from 'next/server';
 
 export const config = {
   // The matcher is configured to run middleware on all routes except for
-  // public assets, the login page, the signup page, and the auth API routes.
+  // public assets, the login page, the signup page, demo page, and the auth API routes.
   // This ensures that authentication is checked for all protected pages.
   matcher: [
-    '/((?!api/auth/verify|login|signup|_next/static|_next/image|favicon.ico).*)',
+    '/((?!api/auth/verify|login|signup|demo|_next/static|_next/image|favicon.ico).*)',
   ],
 };
 

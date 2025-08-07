@@ -168,7 +168,7 @@ export function CreateChallengeDialog() {
                     name="resume"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Candidate's Resume</FormLabel>
+                        <FormLabel>Candidate&apos;s Resume</FormLabel>
                         <FormControl>
                           <Textarea placeholder="Paste resume text here..." className="min-h-[150px]" {...field} />
                         </FormControl>
