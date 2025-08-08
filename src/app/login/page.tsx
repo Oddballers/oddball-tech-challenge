@@ -1,20 +1,13 @@
+'use client'
 
-"use client";
-
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
+import { signInWithEmailAndPassword } from 'firebase/auth'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Form,
   FormControl,
@@ -22,66 +15,65 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
-import Link from "next/link";
-import { auth } from "@/lib/firebase";
-import { setSession } from '@/lib/actions';
-
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { useToast } from '@/hooks/use-toast'
+import { Loader2 } from 'lucide-react'
+import Link from 'next/link'
+import { auth } from '@/lib/firebase'
+import { setSession } from '@/lib/actions'
 
 const LoginFormSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email." }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
-});
+  email: z.string().email({ message: 'Please enter a valid email.' }),
+  password: z.string().min(6, { message: 'Password must be at least 6 characters.' }),
+})
 
 export default function LoginPage() {
-  const router = useRouter();
-  const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter()
+  const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm<z.infer<typeof LoginFormSchema>>({
     resolver: zodResolver(LoginFormSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     },
-  });
+  })
 
   async function onSubmit(values: z.infer<typeof LoginFormSchema>) {
-    setIsLoading(true);
+    setIsLoading(true)
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
-      const idToken = await userCredential.user.getIdToken();
-      
-      await setSession(idToken);
-      
-      toast({
-        title: "Login Successful",
-        description: "Welcome back!",
-      });
+      const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password)
+      const idToken = await userCredential.user.getIdToken()
 
-      router.push("/dashboard");
+      await setSession(idToken)
+
+      toast({
+        title: 'Login Successful',
+        description: 'Welcome back!',
+      })
+
+      router.push('/dashboard')
     } catch (error: any) {
       toast({
-        variant: "destructive",
-        title: "Login Failed",
+        variant: 'destructive',
+        title: 'Login Failed',
         description: error.message,
-      });
+      })
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 m-auto">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center items-center">
-          <CardTitle className="text-2xl font-headline whitespace-nowrap">Oddball Tech Challenge System</CardTitle>
-          <CardDescription>
-            Enter your credentials to access your account.
-          </CardDescription>
+          <CardTitle className="text-2xl font-headline whitespace-nowrap">
+            Oddball Tech Challenge System
+          </CardTitle>
+          <CardDescription>Enter your credentials to access your account.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -93,7 +85,12 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="m@example.com" {...field} autoComplete="email" />
+                      <Input
+                        type="email"
+                        placeholder="m@example.com"
+                        {...field}
+                        autoComplete="email"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -106,7 +103,12 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} autoComplete="current-password" />
+                      <Input
+                        type="password"
+                        placeholder="••••••••"
+                        {...field}
+                        autoComplete="current-password"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -119,7 +121,7 @@ export default function LoginPage() {
             </form>
           </Form>
           <div className="mt-4 text-center text-sm">
-            Don&apos;t have an account?{" "}
+            Don&apos;t have an account?{' '}
             <Link href="/signup" className="underline">
               Sign up
             </Link>
@@ -127,5 +129,5 @@ export default function LoginPage() {
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }

@@ -31,6 +31,15 @@ import {
 export default function MainSidebar() {
   const pathname = usePathname()
   const isActive = (path: string) => pathname === path
+  // Is the login or register page?
+  // If so, we don't want to display the sidebar.
+  const isAuthPage =
+    typeof window !== 'undefined' &&
+    (window.location.pathname === '/login' || window.location.pathname === '/signup')
+
+  if (isAuthPage) {
+    return null
+  }
 
   return (
     <Sidebar>
