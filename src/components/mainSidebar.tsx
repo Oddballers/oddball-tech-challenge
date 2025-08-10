@@ -7,11 +7,13 @@ import {
   Users,
   Briefcase,
   FileText,
+  User,
   UserCheck,
   BarChart2,
   Settings,
   HelpCircle,
   Code,
+  LogOut,
 } from 'lucide-react'
 import {
   Sidebar,
@@ -24,6 +26,8 @@ import {
   SidebarGroup,
   SidebarGroupLabel,
 } from '@/components/ui/sidebar'
+import { useRouter } from 'next/navigation'
+import { clearSession } from '@/lib/actions'
 
 /**
  * Encapsulated sidebar for the dashboard pages
@@ -31,15 +35,19 @@ import {
 export default function MainSidebar() {
   const pathname = usePathname()
   const isActive = (path: string) => pathname === path
+
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    await clearSession()
+    router.push('/login')
+  }
+
   // Is the login or register page?
   // If so, we don't want to display the sidebar.
-  const isAuthPage =
-    typeof window !== 'undefined' &&
-    (window.location.pathname === '/login' || window.location.pathname === '/signup')
+  const isAuthPage = ['/login', '/signup'].includes(pathname)
 
-  if (isAuthPage) {
-    return null
-  }
+  if (isAuthPage) return null
 
   return (
     <Sidebar>
@@ -134,9 +142,23 @@ export default function MainSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
+            <Link href="/profile" passHref>
+              <SidebarMenuButton isActive={isActive('/profile')} tooltip={{ children: 'Profile' }}>
+                <User />
+                <span>Profile</span>
+              </SidebarMenuButton>
+            </Link>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
             <SidebarMenuButton tooltip={{ children: 'Settings' }}>
               <Settings />
               <span>Settings</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={handleLogout} tooltip={{ children: 'Logout' }}>
+              <LogOut />
+              <span>Logout</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
 

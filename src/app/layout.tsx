@@ -36,7 +36,9 @@ export default function RootLayout({
       <body className="font-body antialiased">
         <AppProvider user={user}>
           <SidebarProvider>
-            <MainSidebar />
+            <div className="mr-5">
+              <MainSidebar />
+            </div>
             {children}
             <Toaster />
           </SidebarProvider>
